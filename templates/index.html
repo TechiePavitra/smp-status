@@ -19,12 +19,14 @@
                 </div>
             </div>
 
+
             <div class="divider"></div>
 
 
             <!-- ================= JAVA EDITION ================= -->
 
             <div class="edition">
+
                 <div class="edition-header">
                     <div>
                         <h2>Java Edition</h2>
@@ -37,12 +39,8 @@
                     </div>
                 </div>
 
-                <div class="stats">
 
-                    <div class="stat">
-                        <span class="label">Players</span>
-                        <strong id="java-players">—</strong>
-                    </div>
+                <div class="stats">
 
                     <div class="stat">
                         <span class="label">Ping</span>
@@ -56,13 +54,6 @@
 
                 </div>
 
-                <div class="players-section">
-                    <span class="label">Online Players</span>
-
-                    <div id="java-player-list" class="player-list">
-                        <span class="no-players">No players online</span>
-                    </div>
-                </div>
             </div>
 
 
@@ -72,6 +63,7 @@
             <!-- ================= BEDROCK EDITION ================= -->
 
             <div class="edition">
+
                 <div class="edition-header">
                     <div>
                         <h2>Bedrock Edition</h2>
@@ -84,12 +76,8 @@
                     </div>
                 </div>
 
-                <div class="stats">
 
-                    <div class="stat">
-                        <span class="label">Players</span>
-                        <strong id="bedrock-players">—</strong>
-                    </div>
+                <div class="stats">
 
                     <div class="stat">
                         <span class="label">Ping</span>
@@ -102,14 +90,50 @@
                     </div>
 
                 </div>
+
+            </div>
+
+
+            <div class="divider"></div>
+
+
+            <!-- ================= SHARED PLAYER COUNT ================= -->
+
+            <div class="players-section">
+
+                <div class="shared-player-count">
+                    <span class="label">Players Online</span>
+                    <strong id="players">—</strong>
+                </div>
+
+
+                <div class="online-players">
+
+                    <span class="label">Online Players</span>
+
+                    <div id="java-player-list" class="player-list">
+                        <span class="no-players">
+                            No players online
+                        </span>
+                    </div>
+
+                </div>
+
             </div>
 
 
             <!-- ================= FOOTER ================= -->
 
             <div class="footer">
-                <span id="last-updated">Checking status...</span>
-                <button onclick="checkStatus()">Refresh</button>
+
+                <span id="last-updated">
+                    Checking status...
+                </span>
+
+                <button onclick="checkStatus()">
+                    Refresh
+                </button>
+
             </div>
 
         </section>
@@ -119,50 +143,97 @@
 
     <script>
 
+        /*
+         * Update ONLINE / OFFLINE badge
+         */
         function updateBadge(badge, textElement, online) {
 
             badge.classList.remove("online", "offline");
-            badge.classList.add(online ? "online" : "offline");
 
-            textElement.textContent = online ? "ONLINE" : "OFFLINE";
+            badge.classList.add(
+                online ? "online" : "offline"
+            );
+
+            textElement.textContent =
+                online ? "ONLINE" : "OFFLINE";
         }
 
 
+        /*
+         * =========================
+         * JAVA STATUS
+         * =========================
+         */
+
         function updateJavaStatus(java) {
 
-            const badge = document.getElementById("java-status-badge");
-            const statusText = document.getElementById("java-status-text");
+            const badge =
+                document.getElementById("java-status-badge");
 
-            const players = document.getElementById("java-players");
-            const ping = document.getElementById("java-ping");
-            const version = document.getElementById("java-version");
+            const statusText =
+                document.getElementById("java-status-text");
 
-            const playerList = document.getElementById("java-player-list");
+            const ping =
+                document.getElementById("java-ping");
+
+            const version =
+                document.getElementById("java-version");
+
+            const players =
+                document.getElementById("players");
+
+            const playerList =
+                document.getElementById("java-player-list");
 
 
-            updateBadge(badge, statusText, java.online);
+            updateBadge(
+                badge,
+                statusText,
+                java.online
+            );
 
 
             if (java.online) {
 
+                /*
+                 * Java is the PRIMARY source
+                 * for the shared player count.
+                 */
                 players.textContent =
                     `${java.players} / ${java.max_players}`;
 
-                ping.textContent =
-                    java.ping !== null ? `${java.ping} ms` : "—";
 
+                /*
+                 * Java ping
+                 */
+                ping.textContent =
+                    java.ping !== null
+                        ? `${java.ping} ms`
+                        : "—";
+
+
+                /*
+                 * Java version
+                 */
                 version.textContent =
                     java.version || "Unknown";
 
 
+                /*
+                 * Online player names
+                 */
                 playerList.innerHTML = "";
 
 
-                if (java.player_names && java.player_names.length > 0) {
+                if (
+                    java.player_names &&
+                    java.player_names.length > 0
+                ) {
 
                     java.player_names.forEach(name => {
 
-                        const player = document.createElement("span");
+                        const player =
+                            document.createElement("span");
 
                         player.className = "player";
 
@@ -181,15 +252,27 @@
 
             } else {
 
-                players.textContent = "—";
                 ping.textContent = "—";
                 version.textContent = "Unknown";
+
+                /*
+                 * If Java is offline, we don't have
+                 * a reliable shared player count.
+                 */
+                players.textContent = "—";
+
 
                 playerList.innerHTML =
                     '<span class="no-players">Server is offline</span>';
             }
         }
 
+
+        /*
+         * =========================
+         * BEDROCK STATUS
+         * =========================
+         */
 
         function updateBedrockStatus(bedrock) {
 
@@ -198,9 +281,6 @@
 
             const statusText =
                 document.getElementById("bedrock-status-text");
-
-            const players =
-                document.getElementById("bedrock-players");
 
             const ping =
                 document.getElementById("bedrock-ping");
@@ -218,25 +298,34 @@
 
             if (bedrock.online) {
 
-                players.textContent =
-                    `${bedrock.players} / ${bedrock.max_players}`;
-
+                /*
+                 * Bedrock has its own ping.
+                 */
                 ping.textContent =
                     bedrock.ping !== null
                         ? `${bedrock.ping} ms`
                         : "—";
 
+
+                /*
+                 * Bedrock has its own version.
+                 */
                 version.textContent =
                     bedrock.version || "Unknown";
 
             } else {
 
-                players.textContent = "—";
                 ping.textContent = "—";
                 version.textContent = "Unknown";
             }
         }
 
+
+        /*
+         * =========================
+         * CHECK STATUS
+         * =========================
+         */
 
         async function checkStatus() {
 
@@ -249,8 +338,11 @@
                 const response =
                     await fetch("/api/status");
 
+
                 if (!response.ok) {
-                    throw new Error("Server returned an error");
+                    throw new Error(
+                        "Server returned an error"
+                    );
                 }
 
 
@@ -258,8 +350,23 @@
                     await response.json();
 
 
+                /*
+                 * Java controls:
+                 * - Player count
+                 * - Player names
+                 * - Java ping
+                 * - Java version
+                 * - Java status
+                 */
                 updateJavaStatus(data.java);
 
+
+                /*
+                 * Bedrock controls:
+                 * - Bedrock status
+                 * - Bedrock ping
+                 * - Bedrock version
+                 */
                 updateBedrockStatus(data.bedrock);
 
 
@@ -270,7 +377,10 @@
 
             } catch (error) {
 
-                console.error("Status check failed:", error);
+                console.error(
+                    "Status check failed:",
+                    error
+                );
 
 
                 updateJavaStatus({
@@ -285,8 +395,6 @@
 
                 updateBedrockStatus({
                     online: false,
-                    players: 0,
-                    max_players: 0,
                     version: "Unknown",
                     ping: null
                 });
@@ -298,12 +406,19 @@
         }
 
 
-        // Check immediately when the page loads.
+        /*
+         * Initial check
+         */
         checkStatus();
 
 
-        // Automatically update every 10 seconds.
-        setInterval(checkStatus, 10000);
+        /*
+         * Automatically update every 10 seconds
+         */
+        setInterval(
+            checkStatus,
+            10000
+        );
 
     </script>
 
