@@ -50,16 +50,21 @@ def get_bedrock_status():
 
         return {
             "online": True,
-            "ping": round(status.latency),
-            "version": status.version.name
+            "players": status.players.online,
+            "max_players": status.players.max,
+            "version": status.version.name,
+            "ping": round(status.latency)
         }
 
     except Exception:
         return {
             "online": False,
-            "ping": None,
-            "version": "Unknown"
+            "players": 0,
+            "max_players": 0,
+            "version": "Unknown",
+            "ping": None
         }
+
 
 # Get Both Server Statuses
 def get_server_status():

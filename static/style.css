@@ -119,7 +119,7 @@ h1 {
 
 .stats {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 12px;
 }
 
@@ -144,31 +144,13 @@ h1 {
 }
 
 
-/* ================= SHARED PLAYERS ================= */
+/* ================= ONLINE PLAYERS ================= */
 
 .players-section {
-    margin-top: 0;
+    margin-top: 18px;
 }
 
-.shared-player-count {
-    text-align: center;
-    padding: 4px 0 24px;
-}
-
-.shared-player-count .label {
-    margin-bottom: 5px;
-}
-
-.shared-player-count strong {
-    font-size: 30px;
-    letter-spacing: -0.03em;
-}
-
-.online-players {
-    margin-top: 0;
-}
-
-.online-players > .label {
+.players-section > .label {
     margin-bottom: 10px;
 }
 
@@ -275,8 +257,5 @@ button:hover {
     button {
         width: 100%;
     }
-
-    .shared-player-count strong {
-        font-size: 27px;
-    }
 }
+
