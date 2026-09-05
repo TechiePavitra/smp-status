@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Status - SteamForge SMP</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="container">
+        <section class="status-card">
+            <div class="top">
+                <div>
+                    <p class="eyebrow">SteamForge SMP</p>
+                    <h1>Server Status</h1>
+                    <p class="address">{{ "drake-efforts.tun.ply.gg" }}</p>
+                </div>
+
+                <div id="status-badge"
+                     class="badge {{ 'online' if status.online else 'offline' }}">
+                    <span class="dot"></span>
+                    <span id="status-text">
+                        {{ "ONLINE" if status.online else "OFFLINE" }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="stats">
+                <div class="stat">
+                    <span class="label">Players</span>
+                    <strong id="players">
+                        {{ status.players }} / {{ status.max_players }}
+                    </strong>
+                </div>
+
+                <div class="stat">
+                    <span class="label">Version</span>
+                    <strong id="version">{{ status.version }}</strong>
+                </div>
+
+                <div class="stat">
+                    <span class="label">Address</span>
+                    <strong>Java Edition</strong>
+                </div>
+            </div>
+
+            <div class="footer">
+                <span id="last-updated">Checking status...</span>
+                <button onclick="checkStatus()">Refresh</button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        async function checkStatus() {
+            const statusText = document.getElementById("status-text");
+            const badge = document.getElementById("status-badge");
+            const players = document.getElementById("players");
+            const version = document.getElementById("version");
+            const updated = document.getElementById("last-updated");
+
+            try {
+                const response = await fetch("/api/status");
+                const data = await response.json();
+
+                badge.classList.remove("online", "offline");
+                badge.classList.add(data.online ? "online" : "offline");
+
+                statusText.textContent = data.online ? "ONLINE" : "OFFLINE";
+                players.textContent = data.online
+                    ? `${data.players} / ${data.max_players}`
+                    : "—";
+                version.textContent = data.version;
+
+                updated.textContent =
+                    "Last checked: " + new Date().toLocaleTimeString();
+            } catch (error) {
+                badge.classList.remove("online");
+                badge.classList.add("offline");
+                statusText.textContent = "OFFLINE";
+                players.textContent = "—";
+                version.textContent = "Unknown";
+                updated.textContent = "Unable to check server";
+            }
+        }
+
+        // Automatically update every 10 seconds.
+        setInterval(checkStatus, 10000);
+        checkStatus();
+    </script>
+</body>
+</html>
