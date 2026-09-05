@@ -46,12 +46,35 @@ h1 {
     letter-spacing: -0.04em;
 }
 
-.address {
-    margin: 9px 0 0;
-    color: #71717a;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 14px;
+
+/* ================= EDITIONS ================= */
+
+.edition {
+    width: 100%;
 }
+
+.edition-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 18px;
+}
+
+.edition-header h2 {
+    margin: 0;
+    font-size: 21px;
+    letter-spacing: -0.025em;
+}
+
+.edition-subtitle {
+    margin: 4px 0 0;
+    color: #71717a;
+    font-size: 12px;
+}
+
+
+/* ================= STATUS BADGE ================= */
 
 .badge {
     display: inline-flex;
@@ -62,6 +85,7 @@ h1 {
     font-size: 12px;
     font-weight: 800;
     letter-spacing: 0.04em;
+    flex-shrink: 0;
 }
 
 .badge.online {
@@ -81,11 +105,17 @@ h1 {
     background: currentColor;
 }
 
+
+/* ================= DIVIDER ================= */
+
 .divider {
     height: 1px;
     background: #e4e4e7;
     margin: 30px 0;
 }
+
+
+/* ================= STATS ================= */
 
 .stats {
     display: grid;
@@ -97,7 +127,8 @@ h1 {
     background: #f8f8f8;
     border: 1px solid #ededed;
     border-radius: 13px;
-    padding: 20px;
+    padding: 18px;
+    min-width: 0;
 }
 
 .label {
@@ -111,6 +142,43 @@ h1 {
     font-size: 17px;
     word-break: break-word;
 }
+
+
+/* ================= ONLINE PLAYERS ================= */
+
+.players-section {
+    margin-top: 18px;
+}
+
+.players-section > .label {
+    margin-bottom: 10px;
+}
+
+.player-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 34px;
+}
+
+.player {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 11px;
+    background: #f8f8f8;
+    border: 1px solid #ededed;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.no-players {
+    color: #a1a1aa;
+    font-size: 13px;
+}
+
+
+/* ================= FOOTER ================= */
 
 .footer {
     margin-top: 24px;
@@ -136,7 +204,11 @@ button:hover {
     opacity: 0.88;
 }
 
+
+/* ================= MOBILE ================= */
+
 @media (max-width: 600px) {
+
     .status-card {
         padding: 24px;
     }
@@ -145,7 +217,45 @@ button:hover {
         flex-direction: column;
     }
 
+    .edition-header {
+        align-items: flex-start;
+    }
+
+    .edition-header h2 {
+        font-size: 19px;
+    }
+
     .stats {
         grid-template-columns: 1fr;
     }
+
+    .footer {
+        align-items: flex-start;
+    }
 }
+
+
+@media (max-width: 420px) {
+
+    .status-card {
+        padding: 20px;
+    }
+
+    .edition-header {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .badge {
+        align-self: flex-start;
+    }
+
+    .footer {
+        flex-direction: column;
+    }
+
+    button {
+        width: 100%;
+    }
+}
+

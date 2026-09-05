@@ -6,89 +6,306 @@
     <title>Server Status - SteamForge SMP</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
     <main class="container">
+
         <section class="status-card">
+
             <div class="top">
                 <div>
                     <p class="eyebrow">SteamForge SMP - TechnoBlade Never Dies...!</p>
                     <h1>Server Status</h1>
-                    <p class="address">{{ "drake-efforts.tun.ply.gg" }}</p>
-                </div>
-
-                <div id="status-badge"
-                     class="badge {{ 'online' if status.online else 'offline' }}">
-                    <span class="dot"></span>
-                    <span id="status-text">
-                        {{ "ONLINE" if status.online else "OFFLINE" }}
-                    </span>
                 </div>
             </div>
 
             <div class="divider"></div>
 
-            <div class="stats">
-                <div class="stat">
-                    <span class="label">Players</span>
-                    <strong id="players">
-                        {{ status.players }} / {{ status.max_players }}
-                    </strong>
+
+            <!-- ================= JAVA EDITION ================= -->
+
+            <div class="edition">
+                <div class="edition-header">
+                    <div>
+                        <h2>Java Edition</h2>
+                        <p class="edition-subtitle">Minecraft Java Edition</p>
+                    </div>
+
+                    <div id="java-status-badge" class="badge offline">
+                        <span class="dot"></span>
+                        <span id="java-status-text">OFFLINE</span>
+                    </div>
                 </div>
 
-                <div class="stat">
-                    <span class="label">Version</span>
-                    <strong id="version">{{ status.version }}</strong>
+                <div class="stats">
+
+                    <div class="stat">
+                        <span class="label">Players</span>
+                        <strong id="java-players">—</strong>
+                    </div>
+
+                    <div class="stat">
+                        <span class="label">Ping</span>
+                        <strong id="java-ping">—</strong>
+                    </div>
+
+                    <div class="stat">
+                        <span class="label">Version</span>
+                        <strong id="java-version">Unknown</strong>
+                    </div>
+
                 </div>
 
-                <div class="stat">
-                    <span class="label">Address</span>
-                    <strong>Java Edition</strong>
+                <div class="players-section">
+                    <span class="label">Online Players</span>
+
+                    <div id="java-player-list" class="player-list">
+                        <span class="no-players">No players online</span>
+                    </div>
                 </div>
             </div>
+
+
+            <div class="divider"></div>
+
+
+            <!-- ================= BEDROCK EDITION ================= -->
+
+            <div class="edition">
+                <div class="edition-header">
+                    <div>
+                        <h2>Bedrock Edition</h2>
+                        <p class="edition-subtitle">Minecraft Bedrock Edition</p>
+                    </div>
+
+                    <div id="bedrock-status-badge" class="badge offline">
+                        <span class="dot"></span>
+                        <span id="bedrock-status-text">OFFLINE</span>
+                    </div>
+                </div>
+
+                <div class="stats">
+
+                    <div class="stat">
+                        <span class="label">Players</span>
+                        <strong id="bedrock-players">—</strong>
+                    </div>
+
+                    <div class="stat">
+                        <span class="label">Ping</span>
+                        <strong id="bedrock-ping">—</strong>
+                    </div>
+
+                    <div class="stat">
+                        <span class="label">Version</span>
+                        <strong id="bedrock-version">Unknown</strong>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <!-- ================= FOOTER ================= -->
 
             <div class="footer">
                 <span id="last-updated">Checking status...</span>
                 <button onclick="checkStatus()">Refresh</button>
             </div>
+
         </section>
+
     </main>
 
+
     <script>
-        async function checkStatus() {
-            const statusText = document.getElementById("status-text");
-            const badge = document.getElementById("status-badge");
-            const players = document.getElementById("players");
-            const version = document.getElementById("version");
-            const updated = document.getElementById("last-updated");
 
-            try {
-                const response = await fetch("/api/status");
-                const data = await response.json();
+        function updateBadge(badge, textElement, online) {
 
-                badge.classList.remove("online", "offline");
-                badge.classList.add(data.online ? "online" : "offline");
+            badge.classList.remove("online", "offline");
+            badge.classList.add(online ? "online" : "offline");
 
-                statusText.textContent = data.online ? "ONLINE" : "OFFLINE";
-                players.textContent = data.online
-                    ? `${data.players} / ${data.max_players}`
-                    : "—";
-                version.textContent = data.version;
+            textElement.textContent = online ? "ONLINE" : "OFFLINE";
+        }
 
-                updated.textContent =
-                    "Last checked: " + new Date().toLocaleTimeString();
-            } catch (error) {
-                badge.classList.remove("online");
-                badge.classList.add("offline");
-                statusText.textContent = "OFFLINE";
+
+        function updateJavaStatus(java) {
+
+            const badge = document.getElementById("java-status-badge");
+            const statusText = document.getElementById("java-status-text");
+
+            const players = document.getElementById("java-players");
+            const ping = document.getElementById("java-ping");
+            const version = document.getElementById("java-version");
+
+            const playerList = document.getElementById("java-player-list");
+
+
+            updateBadge(badge, statusText, java.online);
+
+
+            if (java.online) {
+
+                players.textContent =
+                    `${java.players} / ${java.max_players}`;
+
+                ping.textContent =
+                    java.ping !== null ? `${java.ping} ms` : "—";
+
+                version.textContent =
+                    java.version || "Unknown";
+
+
+                playerList.innerHTML = "";
+
+
+                if (java.player_names && java.player_names.length > 0) {
+
+                    java.player_names.forEach(name => {
+
+                        const player = document.createElement("span");
+
+                        player.className = "player";
+
+                        player.textContent = name;
+
+                        playerList.appendChild(player);
+
+                    });
+
+                } else {
+
+                    playerList.innerHTML =
+                        '<span class="no-players">No players online</span>';
+
+                }
+
+            } else {
+
                 players.textContent = "—";
+                ping.textContent = "—";
                 version.textContent = "Unknown";
-                updated.textContent = "Unable to check server";
+
+                playerList.innerHTML =
+                    '<span class="no-players">Server is offline</span>';
             }
         }
 
+
+        function updateBedrockStatus(bedrock) {
+
+            const badge =
+                document.getElementById("bedrock-status-badge");
+
+            const statusText =
+                document.getElementById("bedrock-status-text");
+
+            const players =
+                document.getElementById("bedrock-players");
+
+            const ping =
+                document.getElementById("bedrock-ping");
+
+            const version =
+                document.getElementById("bedrock-version");
+
+
+            updateBadge(
+                badge,
+                statusText,
+                bedrock.online
+            );
+
+
+            if (bedrock.online) {
+
+                players.textContent =
+                    `${bedrock.players} / ${bedrock.max_players}`;
+
+                ping.textContent =
+                    bedrock.ping !== null
+                        ? `${bedrock.ping} ms`
+                        : "—";
+
+                version.textContent =
+                    bedrock.version || "Unknown";
+
+            } else {
+
+                players.textContent = "—";
+                ping.textContent = "—";
+                version.textContent = "Unknown";
+            }
+        }
+
+
+        async function checkStatus() {
+
+            const updated =
+                document.getElementById("last-updated");
+
+
+            try {
+
+                const response =
+                    await fetch("/api/status");
+
+                if (!response.ok) {
+                    throw new Error("Server returned an error");
+                }
+
+
+                const data =
+                    await response.json();
+
+
+                updateJavaStatus(data.java);
+
+                updateBedrockStatus(data.bedrock);
+
+
+                updated.textContent =
+                    "Last checked: " +
+                    new Date().toLocaleTimeString();
+
+
+            } catch (error) {
+
+                console.error("Status check failed:", error);
+
+
+                updateJavaStatus({
+                    online: false,
+                    players: 0,
+                    max_players: 0,
+                    version: "Unknown",
+                    ping: null,
+                    player_names: []
+                });
+
+
+                updateBedrockStatus({
+                    online: false,
+                    players: 0,
+                    max_players: 0,
+                    version: "Unknown",
+                    ping: null
+                });
+
+
+                updated.textContent =
+                    "Unable to check server";
+            }
+        }
+
+
+        // Check immediately when the page loads.
+        checkStatus();
+
+
         // Automatically update every 10 seconds.
         setInterval(checkStatus, 10000);
-        checkStatus();
+
     </script>
+
 </body>
 </html>
