@@ -38,25 +38,28 @@ def status():
     except Exception as e:
         print(f"Java Server Offline: {e}")
 
-    # --- BEDROCK STATUS ---
+# --- BEDROCK STATUS ---
     bedrock_data = {
         "online": False, "ping": None, "version": "Unknown"
     }
     try:
         bedrock_server = BedrockServer.lookup(f"{BEDROCK_IP}:{BEDROCK_PORT}")
         bedrock_status = bedrock_server.status()
+        
         bedrock_data["online"] = True
         bedrock_data["ping"] = round(bedrock_status.latency)
-        # Using .version instead of .name to fix the Bedrock bug
-        bedrock_data["version"] = bedrock_status.version.version
+        
+        # Safely extract the version without crashing if the attribute changed
+        if hasattr(bedrock_status, 'version'):
+            if hasattr(bedrock_status.version, 'version'):
+                bedrock_data["version"] = bedrock_status.version.version
+            elif hasattr(bedrock_status.version, 'name'):
+                bedrock_data["version"] = bedrock_status.version.name
+            else:
+                bedrock_data["version"] = str(bedrock_status.version)
+                
     except Exception as e:
-        print(f"Bedrock Server Offline: {e}")
-
-    # Return as JSON API
-    return jsonify({
-        "java": java_data,
-        "bedrock": bedrock_data
-    })
-
+        print(f"Bedrock Server Offline or Error: {e}")
+        
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
