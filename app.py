@@ -1,62 +1,96 @@
 from flask import Flask, render_template, jsonify
 from mcstatus import JavaServer, BedrockServer
+import os
 
 app = Flask(__name__)
 
 # ==========================================
-# SERVER CONFIGURATION / Our Main Server IP'S
+# SERVER ADDRESSES
 # ==========================================
-JAVA_IP = "drake-efforts.tun.ply.gg"
-JAVA_PORT = 25565 # Default Port
+JAVA_ADDRESS = "drake-efforts.tun.ply.gg"
+BEDROCK_ADDRESS = "147.185.221.231:57867"
 
-BEDROCK_IP = "147.185.221.231"
-BEDROCK_PORT = 57867
-# ==========================================
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/api/status')
-def status():
-    # --- JAVA STATUS ---
-    java_data = {
-        "online": False, "ping": None, "version": "Unknown",
-        "players": 0, "max_players": 0, "player_names": []
-    }
+def get_java_status():
     try:
-        java_server = JavaServer.lookup(f"{JAVA_IP}:{JAVA_PORT}")
-        java_status = java_server.status()
-        java_data["online"] = True
-        java_data["ping"] = round(java_status.latency)
-        java_data["version"] = java_status.version.name
-        java_data["players"] = java_status.players.online
-        java_data["max_players"] = java_status.players.max
-        # Extract player names if available
-        if java_status.players.sample:
-            java_data["player_names"] = [p.name for p in java_status.players.sample]
+        server = JavaServer.lookup(JAVA_ADDRESS)
+        status = server.status()
+
+        players = []
+        if status.players.sample:
+            players = [p.name for p in status.players.sample]
+
+        return {
+            "online": True,
+            "players": status.players.online,
+            "max_players": status.players.max,
+            "version": status.version.name,
+            "ping": round(status.latency),
+            "player_names": players
+        }
     except Exception as e:
         print(f"Java Server Offline: {e}")
+        return {
+            "online": False,
+            "players": 0,
+            "max_players": 0,
+            "version": "Unknown",
+            "ping": None,
+            "player_names": []
+        }
 
-    # --- BEDROCK STATUS ---
-    bedrock_data = {
-        "online": False, "ping": None, "version": "Unknown"
-    }
+def get_bedrock_status():
     try:
-        bedrock_server = BedrockServer.lookup(f"{BEDROCK_IP}:{BEDROCK_PORT}")
-        bedrock_status = bedrock_server.status()
-        bedrock_data["online"] = True
-        bedrock_data["ping"] = round(bedrock_status.latency)
-        # Using .version instead of .name to fix the Bedrock bug
-        bedrock_data["version"] = bedrock_status.version.version
+        server = BedrockServer.lookup(BEDROCK_ADDRESS)
+        status = server.status()
+        
+        # Safely extract Bedrock version to prevent AttributeErrors
+        version_name = "Unknown"
+        if hasattr(status, 'version'):
+            if hasattr(status.version, 'version'):
+                version_name = status.version.version
+            elif hasattr(status.version, 'name'):
+                version_name = status.version.name
+            else:
+                version_name = str(status.version)
+
+        return {
+            "online": True,
+            "ping": round(status.latency),
+            "version": version_name
+        }
     except Exception as e:
         print(f"Bedrock Server Offline: {e}")
+        return {
+            "online": False,
+            "ping": None,
+            "version": "Unknown"
+        }
 
-    # Return as JSON API
-    return jsonify({
-        "java": java_data,
-        "bedrock": bedrock_data
-    })
+# ==========================================
+# ROUTES
+# ==========================================
+@app.route("/")
+def index():
+    return render_template("index.html")
 
-if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+@app.route("/api/status")
+def api_status():
+    # Wrap the entire response in a try-except block. 
+    # This guarantees the API will ALWAYS return valid JSON and never crash the UI.
+    try:
+        return jsonify({
+            "java": get_java_status(),
+            "bedrock": get_bedrock_status()
+        })
+    except Exception as e:
+        print(f"FATAL API ERROR: {e}")
+        return jsonify({
+            "java": {"online": False, "players": 0, "max_players": 0, "version": "Error", "ping": None, "player_names": []},
+            "bedrock": {"online": False, "ping": None, "version": "Error"}
+        })
+
+if __name__ == "__main__":
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 10000))
+    )
