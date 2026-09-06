@@ -3,88 +3,60 @@ from mcstatus import JavaServer, BedrockServer
 
 app = Flask(__name__)
 
-# Minecraft Server Addresses
-JAVA_ADDRESS = "drake-efforts.tun.ply.gg"
-BEDROCK_ADDRESS = "147.185.221.231:57867"
+# ==========================================
+# SERVER CONFIGURATION / Our Main Server IP'S
+# ==========================================
+JAVA_IP = "drake-efforts.tun.ply.gg"
+JAVA_PORT = 25565 # Default Port
 
+BEDROCK_IP = "147.185.221.231"
+BEDROCK_PORT = 57867
+# ==========================================
 
-# Java Server Status
-def get_java_status():
-    try:
-        server = JavaServer.lookup(JAVA_ADDRESS)
-        status = server.status()
-
-        players = []
-
-        if status.players.sample:
-            players = [
-                player.name
-                for player in status.players.sample
-            ]
-
-        return {
-            "online": True,
-            "players": status.players.online,
-            "max_players": status.players.max,
-            "version": status.version.name,
-            "ping": round(status.latency),
-            "player_names": players
-        }
-
-    except Exception:
-        return {
-            "online": False,
-            "players": 0,
-            "max_players": 0,
-            "version": "Unknown",
-            "ping": None,
-            "player_names": []
-        }
-
-
-# Bedrock Server Status
-def get_bedrock_status():
-    try:
-        server = BedrockServer.lookup(BEDROCK_ADDRESS)
-        status = server.status()
-
-        return {
-            "online": True,
-            "ping": round(status.latency),
-            "version": status.version.name
-        }
-
-    except Exception:
-        return {
-            "online": False,
-            "ping": None,
-            "version": "Unknown"
-        }
-
-# Get Both Server Statuses
-def get_server_status():
-    return {
-        "java": get_java_status(),
-        "bedrock": get_bedrock_status()
-    }
-
-
-# Website 
-@app.route("/")
+@app.route('/')
 def index():
-    return render_template("index.html", status=get_server_status())
+    return render_template('index.html')
 
+@app.route('/api/status')
+def status():
+    # --- JAVA STATUS ---
+    java_data = {
+        "online": False, "ping": None, "version": "Unknown",
+        "players": 0, "max_players": 0, "player_names": []
+    }
+    try:
+        java_server = JavaServer.lookup(f"{JAVA_IP}:{JAVA_PORT}")
+        java_status = java_server.status()
+        java_data["online"] = True
+        java_data["ping"] = round(java_status.latency)
+        java_data["version"] = java_status.version.name
+        java_data["players"] = java_status.players.online
+        java_data["max_players"] = java_status.players.max
+        # Extract player names if available
+        if java_status.players.sample:
+            java_data["player_names"] = [p.name for p in java_status.players.sample]
+    except Exception as e:
+        print(f"Java Server Offline: {e}")
 
-@app.route("/api/status")
-def api_status():
-    return jsonify(get_server_status())
+    # --- BEDROCK STATUS ---
+    bedrock_data = {
+        "online": False, "ping": None, "version": "Unknown"
+    }
+    try:
+        bedrock_server = BedrockServer.lookup(f"{BEDROCK_IP}:{BEDROCK_PORT}")
+        bedrock_status = bedrock_server.status()
+        bedrock_data["online"] = True
+        bedrock_data["ping"] = round(bedrock_status.latency)
+        # Using .version instead of .name to fix the Bedrock bug
+        bedrock_data["version"] = bedrock_status.version.version
+    except Exception as e:
+        print(f"Bedrock Server Offline: {e}")
 
+    # Return as JSON API
+    return jsonify({
+        "java": java_data,
+        "bedrock": bedrock_data
+    })
 
-# Backend
-if __name__ == "__main__":
-    import os
-
-    app.run(
-        host="0.0.0.0",
-        port=int(os.environ.get("PORT", 10000))
-    )
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
