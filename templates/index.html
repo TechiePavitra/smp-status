@@ -1,4 +1,8 @@
-<!-- i'm working on this major update since a hour, i want to thank god -->
+<!-- 
+Note by Developer: i made this while suffering from pain, there were alot of bugs
+Appearing, and i tried to make this status site as polished as i can, i wanna thank to god!
+for helping, lol yea, it is finallyy a stable status site, I've used Flask and mcstatus    
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -224,9 +228,9 @@
             
             // Replaced the simple dot with rich icons
             if (online) {
-                textElement.innerHTML = '<i class="bi bi-wifi"></i> Online';
+                textElement.innerHTML = '<i class="bi bi-check-circle-fill"></i> Online';
             } else {
-                textElement.innerHTML = '<i class="bi bi-wifi-off"></i> Offline';
+                textElement.innerHTML = '<i class="bi bi-x-circle-fill"></i> Offline';
             }
         }
 
@@ -238,7 +242,7 @@
             if (isOnline) {
                 globalDiv.classList.remove("down");
                 globalIcon.className = "bi bi-check-circle-fill icon-accent";
-                globalText.textContent = "All services are online";
+                globalText.textContent = "All services are operational";
             } else {
                 globalDiv.classList.add("down");
                 globalIcon.className = "bi bi-exclamation-triangle-fill";
