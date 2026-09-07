@@ -36,88 +36,124 @@ for helping, lol yea, it is finallyy a stable status site, I've used Flask and m
             <h1>SteamForge SMP</h1>
         </div>
 
-        <!-- Global Status Indicator -->
-        <div id="global-status" class="global-status">
-            <i id="global-icon" class="bi bi-check-circle-fill"></i>
-            <span id="global-text">Checking server status...</span>
+        <!-- ================= TABS NAVIGATION ================= -->
+        <div class="tabs-nav">
+            <button class="tab-btn active" onclick="switchTab('status')">
+                <i class="bi bi-activity"></i> Status
+            </button>
+            <button class="tab-btn" onclick="switchTab('announcement')">
+                <i class="bi bi-megaphone-fill"></i> Announcements
+            </button>
+        </div>
+
+        <!-- ================= TAB 1: STATUS DASHBOARD ================= -->
+        <div id="tab-status" class="tab-pane">
+
+            <!-- Global Status Indicator -->
+            <div id="global-status" class="global-status">
+                <i id="global-icon" class="bi bi-check-circle-fill"></i>
+                <span id="global-text">Checking server status...</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Ping Graph -->
+            <div>
+                <h2><i class="bi bi-activity icon-accent"></i> Response times</h2>
+                <div class="chart-container">
+                    <canvas id="pingChart"></canvas>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Java Edition -->
+            <div class="edition">
+                <div class="edition-header">
+                    <div>
+                        <h2><i class="bi bi-pc-display icon-accent"></i> Java Edition (Windows / MacOS / Linux) </h2>
+                        <p class="edition-subtitle">Minecraft: Java Edition</p>
+                    </div>
+                    <div id="java-status-badge" class="badge offline">
+                        <span id="java-status-text"><i class="bi bi-x-circle-fill"></i> Offline</span>
+                    </div>
+                </div>
+                <div class="stats">
+                    <div class="stat">
+                        <span class="label">Ping</span>
+                        <strong id="java-ping">—</strong>
+                    </div>
+                    <div class="stat">
+                        <span class="label">Version</span>
+                        <strong id="java-version">Unknown</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Bedrock Edition -->
+            <div class="edition">
+                <div class="edition-header">
+                    <div>
+                        <h2><i class="bi bi-controller icon-accent"></i> Bedrock Edition (Windows / Android / IOS / Console)</h2>
+                        <p class="edition-subtitle">Minecraft: Bedrock Edition</p>
+                    </div>
+                    <div id="bedrock-status-badge" class="badge offline">
+                        <span id="bedrock-status-text"><i class="bi bi-x-circle-fill"></i> Offline</span>
+                    </div>
+                </div>
+                <div class="stats">
+                    <div class="stat">
+                        <span class="label">Ping</span>
+                        <strong id="bedrock-ping">—</strong>
+                    </div>
+                    <div class="stat">
+                        <span class="label">Version</span>
+                        <strong id="bedrock-version">Unknown</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Shared Player Count -->
+            <div class="players-section">
+                <div class="shared-player-count">
+                    <h2><i class="bi bi-people-fill icon-accent"></i> Total Players Online</h2>
+                    <strong id="players" style="font-size: 1.25rem;">—</strong>
+                </div>
+
+                <div class="online-players">
+                    <span class="label">Player Roster</span>
+                    <div id="player-list" class="player-list">
+                        <span class="no-players">No players online</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ================= TAB 2: ANNOUNCEMENTS ================= -->
+        <div id="tab-announcement" class="tab-pane" style="display: none;">
+            {% if announcement %}
+            <div class="announcement-box">
+                <div class="announcement-header">
+                    <h2><i class="bi bi-megaphone-fill icon-accent"></i> Server Announcement</h2>
+                    <span class="announcement-date">{{ announcement.date }}</span>
+                </div>
+                <div class="announcement-content">
+                    {{ announcement.html | safe }}
+                </div>
+            </div>
+            {% else %}
+            <div class="no-announcements">
+                <p><i class="bi bi-info-circle icon-accent"></i> No announcements posted yet.</p>
+            </div>
+            {% endif %}
         </div>
 
         <div class="divider"></div>
-
-        <!-- ================= PING GRAPH ================= -->
-        <div>
-            <h2><i class="bi bi-activity icon-accent"></i> Response times</h2>
-            <div class="chart-container">
-                <canvas id="pingChart"></canvas>
-            </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <!-- ================= JAVA EDITION ================= -->
-        <div class="edition">
-            <div class="edition-header">
-                <div>
-                    <h2><i class="bi bi-pc-display icon-accent"></i> Java Edition (Windows / MacOS / Linux) </h2>
-                    <p class="edition-subtitle">Minecraft: Java Edition</p>
-                </div>
-                <div id="java-status-badge" class="badge offline">
-                    <span id="java-status-text"><i class="bi bi-wifi-off"></i> Offline</span>
-                </div>
-            </div>
-            <div class="stats">
-                <div class="stat">
-                    <span class="label">Ping</span>
-                    <strong id="java-ping">—</strong>
-                </div>
-                <div class="stat">
-                    <span class="label">Version</span>
-                    <strong id="java-version">Unknown</strong>
-                </div>
-            </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <!-- ================= BEDROCK EDITION ================= -->
-        <div class="edition">
-            <div class="edition-header">
-                <div>
-                    <h2><i class="bi bi-controller icon-accent"></i> Bedrock Edition (Windows / Android / IOS / Console)</h2>
-                    <p class="edition-subtitle">Minecraft: Bedrock Edition</p>
-                </div>
-                <div id="bedrock-status-badge" class="badge offline">
-                    <span id="bedrock-status-text"><i class="bi bi-wifi-off"></i> Offline</span>
-                </div>
-            </div>
-            <div class="stats">
-                <div class="stat">
-                    <span class="label">Ping</span>
-                    <strong id="bedrock-ping">—</strong>
-                </div>
-                <div class="stat">
-                    <span class="label">Version</span>
-                    <strong id="bedrock-version">Unknown</strong>
-                </div>
-            </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <!-- ================= SHARED PLAYER COUNT (BOTTOM) ================= -->
-        <div class="players-section">
-            <div class="shared-player-count">
-                <h2><i class="bi bi-people-fill icon-accent"></i> Total Players Online</h2>
-                <strong id="players" style="font-size: 1.25rem;">—</strong>
-            </div>
-
-            <div class="online-players">
-                <span class="label">Player Roster</span>
-                <div id="player-list" class="player-list">
-                    <span class="no-players">No players online</span>
-                </div>
-            </div>
-        </div>
 
         <!-- ================= FOOTER ================= -->
         <div class="footer">
@@ -133,24 +169,41 @@ for helping, lol yea, it is finallyy a stable status site, I've used Flask and m
 
     <script>
         // =========================
+        // TAB SWITCHING
+        // =========================
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.style.display = 'none');
+
+            if (tabId === 'status') {
+                document.getElementById('tab-status').style.display = 'block';
+                document.querySelector("[onclick=\"switchTab('status')\"]").classList.add('active');
+                if (typeof pingChart !== 'undefined') pingChart.resize();
+            } else {
+                document.getElementById('tab-announcement').style.display = 'block';
+                document.querySelector("[onclick=\"switchTab('announcement')\"]").classList.add('active');
+            }
+        }
+
+        // =========================
         // CHART.JS INITIALIZATION
         // =========================
         const ctx = document.getElementById('pingChart').getContext('2d');
         
         // Gradient for Java (Emerald Green)
         let gradientJava = ctx.createLinearGradient(0, 0, 0, 250);
-        gradientJava.addColorStop(0, 'rgba(16, 185, 129, 0.4)'); // #10B981
+        gradientJava.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
         gradientJava.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
 
         // Gradient for Bedrock (Blue)
         let gradientBedrock = ctx.createLinearGradient(0, 0, 0, 250);
-        gradientBedrock.addColorStop(0, 'rgba(59, 130, 246, 0.4)'); // #3B82F6
+        gradientBedrock.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
         gradientBedrock.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
 
         const pingChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: [], // Timestamps
+                labels: [],
                 datasets: [
                     {
                         label: 'Java Ping (ms)',
@@ -205,11 +258,10 @@ for helping, lol yea, it is finallyy a stable status site, I've used Flask and m
             const now = new Date();
             const timeLabel = now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0') + ':' + now.getSeconds().toString().padStart(2, '0');
 
-            // Keep only the last 10 data points on the graph
             if (pingChart.data.labels.length >= 10) {
                 pingChart.data.labels.shift();
-                pingChart.data.datasets[0].data.shift(); // Java
-                pingChart.data.datasets[1].data.shift(); // Bedrock
+                pingChart.data.datasets[0].data.shift();
+                pingChart.data.datasets[1].data.shift();
             }
 
             pingChart.data.labels.push(timeLabel);
@@ -226,7 +278,6 @@ for helping, lol yea, it is finallyy a stable status site, I've used Flask and m
             badge.classList.remove("online", "offline");
             badge.classList.add(online ? "online" : "offline");
             
-            // Replaced the simple dot with rich icons
             if (online) {
                 textElement.innerHTML = '<i class="bi bi-check-circle-fill"></i> Online';
             } else {
@@ -311,11 +362,12 @@ for helping, lol yea, it is finallyy a stable status site, I've used Flask and m
 
         async function checkStatus() {
             const updated = document.getElementById("last-updated");
-            const refreshBtn = document.querySelector("button i");
+            const refreshBtn = document.querySelector(".footer button i");
             
-            // Spin animation on refresh icon
-            refreshBtn.classList.add("bi-spin"); 
-            setTimeout(() => refreshBtn.classList.remove("bi-spin"), 1000);
+            if (refreshBtn) {
+                refreshBtn.classList.add("bi-spin"); 
+                setTimeout(() => refreshBtn.classList.remove("bi-spin"), 1000);
+            }
 
             try {
                 const response = await fetch("/api/status");
@@ -323,15 +375,11 @@ for helping, lol yea, it is finallyy a stable status site, I've used Flask and m
                 
                 const data = await response.json();
 
-                // Update Master Indicator
                 updateGlobalStatus(data.java.online || data.bedrock.online);
-
-                // Update Sections
                 updateJavaStatus(data.java);
                 updateBedrockStatus(data.bedrock);
                 updatePlayerStatus(data.java); 
 
-                // Update Chart with both pings
                 updateChart(
                     data.java.online ? data.java.ping : 0, 
                     data.bedrock.online ? data.bedrock.ping : 0
@@ -354,10 +402,8 @@ for helping, lol yea, it is finallyy a stable status site, I've used Flask and m
             }
         }
 
-        // Initialize and Set Interval
         checkStatus();
         setInterval(checkStatus, 10000);
-
     </script>
 </body>
 </html>

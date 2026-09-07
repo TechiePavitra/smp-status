@@ -1,6 +1,7 @@
 from flask import Flask, render_template, jsonify
 from mcstatus import JavaServer, BedrockServer
-import os
+from datetime import datetime
+import os, markdown, glob
 
 app = Flask(__name__)
 
@@ -43,7 +44,6 @@ def get_bedrock_status():
         server = BedrockServer.lookup(BEDROCK_ADDRESS)
         status = server.status()
         
-        # Safely extract Bedrock version to prevent AttributeErrors
         version_name = "Unknown"
         if hasattr(status, 'version'):
             if hasattr(status.version, 'version'):
@@ -66,13 +66,29 @@ def get_bedrock_status():
             "version": "Unknown"
         }
 
+# for announcements
+def get_latest_announcement():
+    if not os.path.exists("announcement"): return None
+    files = glob.glob("announcement/*.md")
+    if not files: return None
+    
+    parsed_files = []
+    for f in files:
+        date_str = os.path.basename(f).replace('.md', '')
+        try: 
+            parsed_files.append((datetime.strptime(date_str, "%d-%m-%Y"), date_str, f))
+        except ValueError: 
+            continue
+            
+    if not parsed_files: return None
+    latest = sorted(parsed_files, key=lambda x: x[0], reverse=True)[0]
+    
+    with open(latest[2], 'r', encoding='utf-8') as file:
+        return {"date": latest[1], "html": markdown.markdown(file.read())}
+
 # ==========================================
 # ROUTES
 # ==========================================
-@app.route("/")
-def index():
-    return render_template("index.html")
-
 @app.route("/api/status")
 def api_status():
     # Wrap the entire response in a try-except block. 
@@ -88,6 +104,10 @@ def api_status():
             "java": {"online": False, "players": 0, "max_players": 0, "version": "Error", "ping": None, "player_names": []},
             "bedrock": {"online": False, "ping": None, "version": "Error"}
         })
+
+@app.route('/')
+def index():
+    return render_template('index.html', announcement=get_latest_announcement())
 
 if __name__ == "__main__":
     app.run(
